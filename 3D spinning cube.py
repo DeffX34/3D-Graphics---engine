@@ -13,7 +13,7 @@ pygame.display.set_caption("3d engine mazafaka")
 
 clock = pygame.Clock()
 FPS = 60
-focal_length = 120
+focal_length = 250
 
 t = 0
 
@@ -73,18 +73,16 @@ class Cube:
 [(self.vc[6][0]*self.matrix[0][0]) + (self.vc[6][1]*self.matrix[0][1]) + (self.vc[6][2]*self.matrix[0][2]), ((self.vc[6][0]*self.matrix[1][0]) + (self.vc[6][1]*self.matrix[1][1]) + (self.vc[6][2]*self.matrix[1][2])), (self.vc[6][0]*self.matrix[2][0]) + (self.vc[6][1]*self.matrix[2][1]) + (self.vc[6][2]*self.matrix[2][2])],
 [(self.vc[7][0]*self.matrix[0][0]) + (self.vc[7][1]*self.matrix[0][1]) + (self.vc[7][2]*self.matrix[0][2]), ((self.vc[7][0]*self.matrix[1][0]) + (self.vc[7][1]*self.matrix[1][1]) + (self.vc[7][2]*self.matrix[1][2])), (self.vc[7][0]*self.matrix[2][0]) + (self.vc[7][1]*self.matrix[2][1]) + (self.vc[7][2]*self.matrix[2][2])]]
         
-        
         for i in self.vertices:
-            self.screen_vertices.append((i[0] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y"), i[1] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y"), i[1]))
+            self.screen_vertices.append((i[0] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y"), i[2] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y"), i[1]))
 
 
-cube = Cube(0.2, (0, 0, 0))        
+cube = Cube(5, (0, 0, 0))        
 cube.draw()
 
 running = True
 start_time = time()
 
-x, y = WIDTH/2, HEIGHT/2
 r = 100
 
 while running:
