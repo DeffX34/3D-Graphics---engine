@@ -1,10 +1,12 @@
 from math import sqrt
-def rgb0_1(r, g, b):
-    return (r*255, g*255, b*255)
+def rgb0_1(r, g, b, multiplier=1):
+    return ((r*255)*multiplier, (g*255)*multiplier, (b*255)*multiplier)
 
-def rgb_unit0_1(unit):
-    return (unit*255, unit*255, unit*255)
-
+def rgb_unit0_1(unit, convertto255=True):
+    if convertto255:
+        return (unit*255, unit*255, unit*255)
+    else:
+        return(unit, unit, unit)
 def lerp(min, max, a):
     return min + a * (max - min)
 
