@@ -13,7 +13,7 @@ pygame.display.set_caption("3d engine mazafaka")
 hweight = WIDTH/2
 hheight = HEIGHT/2
 
-clock = pygame.Clock()
+clock = pygame.time.Clock()
 FPS = 60
 focal_length = 250
 yblackout = 4
