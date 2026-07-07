@@ -148,9 +148,6 @@ while running:
     scrVert = cube.screen_vertices_dat
     scrDrawEdges = cube.edge_points
 
-    
-        
-
     cube.draw()
     pygame.display.flip()
     os.system("cls")
