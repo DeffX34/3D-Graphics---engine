@@ -1,6 +1,9 @@
 from math import sqrt
-def rgb0_1(r, g, b, multiplier=1):
-    return ((r*255)*multiplier, (g*255)*multiplier, (b*255)*multiplier)
+def rgb0_1(r, g, b, multiplier=1, convertto255 = True):
+    if convertto255:
+        return ((r*255)*multiplier, (g*255)*multiplier, (b*255)*multiplier)
+    else:
+        return (r*multiplier, g*multiplier, b*multiplier)
 
 def rgb_unit0_1(unit, convertto255=True):
     if convertto255:
@@ -19,3 +22,4 @@ def distance (x1, y1, z1, x2, y2, z2, oneaxis = None, axis = None):
         return sqrt((y2-y1)**2)
     elif oneaxis == True and axis == "z":
         return sqrt((z2-z1)**2)
+    

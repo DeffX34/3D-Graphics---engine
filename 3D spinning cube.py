@@ -6,7 +6,7 @@ from math_functions import *
 import os
 pygame.init()
 
-WIDTH = 1920
+WIDTH = 2560
 HEIGHT = 1080
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("3d engine mazafaka")
@@ -15,7 +15,7 @@ hheight = HEIGHT/2
 
 clock = pygame.Clock()
 FPS = 60
-focal_length = 250
+focal_length = 160
 yblackout = 4
 t = 0
 
@@ -67,9 +67,9 @@ class Cube:
                     [self.a, self.a, self.a],
                     [-self.a, self.a, self.a]]
 
-        
+
         self.vertices = [
-[(self.vc[0][0]*self.matrix[0][0]) + (self.vc[0][1]*self.matrix[0][1]) + (self.vc[0][2]*self.matrix[0][2]), ((self.vc[0][0]*self.matrix[1][0]) + (self.vc[0][1]*self.matrix[1][1]) + (self.vc[0][2]*self.matrix[1][2])), (self.vc[0][0]*self.matrix[2][0]) + (self.vc[0][1]*self.matrix[2][1]) + (self.vc[0][2]*self.matrix[2][2])],
+[(self.vc[0][0]*self.matrix[0][0]) + (self.vc[0][1]*self.matrix[0][1]) + (self.vc[0][2]*self.matrix[0][2]), ((self.vc[0][0]*self.matrix[1][0]) + (self.vc[0][1]*self.matrix[1][1]) + (self.vc[0][2]*self.matrix[1][2])), (self.vc[0][0]*self.matrix[2][0]) + (self.vc[0][1]*self.matrix[2][1]) + (self.vc[0][2]*self.matrix[2][2] )],
 [(self.vc[1][0]*self.matrix[0][0]) + (self.vc[1][1]*self.matrix[0][1]) + (self.vc[1][2]*self.matrix[0][2]), ((self.vc[1][0]*self.matrix[1][0]) + (self.vc[1][1]*self.matrix[1][1]) + (self.vc[1][2]*self.matrix[1][2])), (self.vc[1][0]*self.matrix[2][0]) + (self.vc[1][1]*self.matrix[2][1]) + (self.vc[1][2]*self.matrix[2][2])],
 [(self.vc[2][0]*self.matrix[0][0]) + (self.vc[2][1]*self.matrix[0][1]) + (self.vc[2][2]*self.matrix[0][2]), ((self.vc[2][0]*self.matrix[1][0]) + (self.vc[2][1]*self.matrix[1][1]) + (self.vc[2][2]*self.matrix[1][2])), (self.vc[2][0]*self.matrix[2][0]) + (self.vc[2][1]*self.matrix[2][1]) + (self.vc[2][2]*self.matrix[2][2])],
 [(self.vc[3][0]*self.matrix[0][0]) + (self.vc[3][1]*self.matrix[0][1]) + (self.vc[3][2]*self.matrix[0][2]), ((self.vc[3][0]*self.matrix[1][0]) + (self.vc[3][1]*self.matrix[1][1]) + (self.vc[3][2]*self.matrix[1][2])), (self.vc[3][0]*self.matrix[2][0]) + (self.vc[3][1]*self.matrix[2][1]) + (self.vc[3][2]*self.matrix[2][2])],
@@ -103,30 +103,32 @@ class Cube:
         for i in self.vertices:
             self.edge_points.append((i[0], i[1]))
 
-        for i in self.screen_vertices_dat:
-            colorvert = max(min(255, round(lerp(1, 0.2, (i[3]/yblackout)) * 255)), 0)
-            pygame.draw.circle(screen, rgb_unit0_1(colorvert, False), (i[0], i[1]), 5)
+        # for i in self.screen_vertices_dat:
+        #     colorvert = max(min(255, round(lerp(1, 0.2, (i[3]/yblackout)) * 255)), 0)
+        #     pygame.draw.circle(screen, rgb_unit0_1(colorvert, False), (i[0], i[1]), 5)
 
-        for i in range(8):
-            coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
-            start = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
-            end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 and i != 7 else (self.screen_vertices_dat[i - 3][0], self.screen_vertices_dat[i - 3][1])
-            pygame.draw.line(screen, rgb_unit0_1(coloredge, False), start, end)
+        # for i in range(8):
+        #     coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
+        #     start = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
+        #     end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 and i != 7 else (self.screen_vertices_dat[i - 3][0], self.screen_vertices_dat[i - 3][1])
+        #     pygame.draw.line(screen, rgb_unit0_1(coloredge, False), start, end)
             
-        for i in range(8):
-            if i > 3:
-                coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
-                start = (self.screen_vertices_dat[i-4][0], self.screen_vertices_dat[i-4][1])
-                end = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
-                pygame.draw.line(screen, rgb_unit0_1(coloredge, False), start, end)
+        # for i in range(8):
+        #     if i > 3:
+        #         coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
+        #         start = (self.screen_vertices_dat[i-4][0], self.screen_vertices_dat[i-4][1])
+        #         end = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
+        #         pygame.draw.line(screen, rgb_unit0_1(coloredge, False), start, end)
     
         self.screen_facesC.sort(reverse=True)
+
+        colors = [rgb0_1(255, 50, 100, 1, False), rgb0_1(50, 255, 100, 1, False), rgb0_1(100, 50, 255, 1, False), rgb0_1(255, 255, 255, 1, False), rgb0_1(80, 155, 20, 1, False), rgb0_1(180, 10, 255, 1, False)]
         for c in self.screen_facesC:
             colorface = coloredge = max(min(255, round(lerp(1, 0.2, (c[0]/(yblackout+4))) * 255)), 0)
             elem = self.face_vertexesSCR[c[3]]
-            pygame.draw.polygon(screen, rgb_unit0_1(colorface, False), (elem[0], elem[1], elem[2], elem[3]))
+            pygame.draw.polygon(screen, colors[c[3]], (elem[0], elem[1], elem[2], elem[3]))
 
-cube = Cube(7, (0, 0, 0))        
+cube = Cube(7, (25, 0, 8))        
 cube.draw()
 
 running = True
