@@ -38,22 +38,20 @@ class Cube:
         self.Z = 0
         self.edge_points = []
         self.vertices = []
+        self.verices_amo = 8 #Указываем вершины для любой фигуры заранее (потом можно будет создавать фигуры с любым количеством вершин)
         self.cube_facesC = []
         self.screen_facesC = []
         self.cubes_to_draw = []
         self.faces_to_draw = []
         self.face_vertexesSCR = []
         
-    def draw(self):
-        self.faces_to_draw = []
-        self.screen_vertices_dat = []
-        self.edge_points = []
-        self.screen_facesC = []
+    
+    #Смотри - лучше обновлять матрицы и другие параметры в отдельной функции чем в draw - так и чище и расширяемее (Плюсом тестировать легче - одни каефы).
+    def update(self,t):
         self.rot = (lerp(-pi, pi, (sin(t)+1)/2), lerp(-pi, pi, (sin(t+6)+1)/2), lerp(-pi, pi, (cos(t+2)+1)/2))
         self.xR = self.rot[0]
         self.yR = self.rot[1]
         self.zR = self.rot[2]
-        self.face_vertexesSCR = []
         self.matrix = [[cos(self.yR)*cos(self.zR), sin(self.xR)*sin(self.yR)*cos(self.zR)-cos(self.xR)*sin(self.zR), cos(self.xR)*sin(self.yR)*cos(self.zR)+sin(self.xR)*sin(self.zR)],
                        [cos(self.yR)*sin(self.zR), sin(self.xR)*sin(self.yR)*sin(self.zR)+cos(self.xR)*cos(self.zR), cos(self.xR)*sin(self.yR)*sin(self.zR)-sin(self.xR)*cos(self.zR)],
                        [-sin(self.yR), sin(self.xR)*cos(self.yR), cos(self.xR)*cos(self.yR)]]
@@ -67,23 +65,22 @@ class Cube:
                     [self.a, self.a, self.a],
                     [-self.a, self.a, self.a]]
 
-        
-        self.vertices = [
-[(self.vc[0][0]*self.matrix[0][0]) + (self.vc[0][1]*self.matrix[0][1]) + (self.vc[0][2]*self.matrix[0][2]), ((self.vc[0][0]*self.matrix[1][0]) + (self.vc[0][1]*self.matrix[1][1]) + (self.vc[0][2]*self.matrix[1][2])), (self.vc[0][0]*self.matrix[2][0]) + (self.vc[0][1]*self.matrix[2][1]) + (self.vc[0][2]*self.matrix[2][2])],
-[(self.vc[1][0]*self.matrix[0][0]) + (self.vc[1][1]*self.matrix[0][1]) + (self.vc[1][2]*self.matrix[0][2]), ((self.vc[1][0]*self.matrix[1][0]) + (self.vc[1][1]*self.matrix[1][1]) + (self.vc[1][2]*self.matrix[1][2])), (self.vc[1][0]*self.matrix[2][0]) + (self.vc[1][1]*self.matrix[2][1]) + (self.vc[1][2]*self.matrix[2][2])],
-[(self.vc[2][0]*self.matrix[0][0]) + (self.vc[2][1]*self.matrix[0][1]) + (self.vc[2][2]*self.matrix[0][2]), ((self.vc[2][0]*self.matrix[1][0]) + (self.vc[2][1]*self.matrix[1][1]) + (self.vc[2][2]*self.matrix[1][2])), (self.vc[2][0]*self.matrix[2][0]) + (self.vc[2][1]*self.matrix[2][1]) + (self.vc[2][2]*self.matrix[2][2])],
-[(self.vc[3][0]*self.matrix[0][0]) + (self.vc[3][1]*self.matrix[0][1]) + (self.vc[3][2]*self.matrix[0][2]), ((self.vc[3][0]*self.matrix[1][0]) + (self.vc[3][1]*self.matrix[1][1]) + (self.vc[3][2]*self.matrix[1][2])), (self.vc[3][0]*self.matrix[2][0]) + (self.vc[3][1]*self.matrix[2][1]) + (self.vc[3][2]*self.matrix[2][2])],
-[(self.vc[4][0]*self.matrix[0][0]) + (self.vc[4][1]*self.matrix[0][1]) + (self.vc[4][2]*self.matrix[0][2]), ((self.vc[4][0]*self.matrix[1][0]) + (self.vc[4][1]*self.matrix[1][1]) + (self.vc[4][2]*self.matrix[1][2])), (self.vc[4][0]*self.matrix[2][0]) + (self.vc[4][1]*self.matrix[2][1]) + (self.vc[4][2]*self.matrix[2][2])],
-[(self.vc[5][0]*self.matrix[0][0]) + (self.vc[5][1]*self.matrix[0][1]) + (self.vc[5][2]*self.matrix[0][2]), ((self.vc[5][0]*self.matrix[1][0]) + (self.vc[5][1]*self.matrix[1][1]) + (self.vc[5][2]*self.matrix[1][2])), (self.vc[5][0]*self.matrix[2][0]) + (self.vc[5][1]*self.matrix[2][1]) + (self.vc[5][2]*self.matrix[2][2])],
-[(self.vc[6][0]*self.matrix[0][0]) + (self.vc[6][1]*self.matrix[0][1]) + (self.vc[6][2]*self.matrix[0][2]), ((self.vc[6][0]*self.matrix[1][0]) + (self.vc[6][1]*self.matrix[1][1]) + (self.vc[6][2]*self.matrix[1][2])), (self.vc[6][0]*self.matrix[2][0]) + (self.vc[6][1]*self.matrix[2][1]) + (self.vc[6][2]*self.matrix[2][2])],
-[(self.vc[7][0]*self.matrix[0][0]) + (self.vc[7][1]*self.matrix[0][1]) + (self.vc[7][2]*self.matrix[0][2]), ((self.vc[7][0]*self.matrix[1][0]) + (self.vc[7][1]*self.matrix[1][1]) + (self.vc[7][2]*self.matrix[1][2])), (self.vc[7][0]*self.matrix[2][0]) + (self.vc[7][1]*self.matrix[2][1]) + (self.vc[7][2]*self.matrix[2][2])]]
-        
+        self.vertices = [[(self.vc[x][0]*self.matrix[0][0]) + (self.vc[x][1]*self.matrix[0][1]) + (self.vc[x][2]*self.matrix[0][2]), ((self.vc[x][0]*self.matrix[1][0]) + (self.vc[x][1]*self.matrix[1][1]) + (self.vc[x][2]*self.matrix[1][2])), (self.vc[x][0]*self.matrix[2][0]) + (self.vc[x][1]*self.matrix[2][1]) + (self.vc[x][2]*self.matrix[2][2])] for x in range(0, self.verices_amo)] #optimised   
         self.cube_facesC = [(self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]),
-                           (self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]),
-                           (self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]),
-                           (self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]),
-                           (self.vertices[0], self.vertices[3], self.vertices[7], self.vertices[4]),
-                           (self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5])]
+                    (self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]),
+                    (self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]),
+                    (self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]),
+                    (self.vertices[0], self.vertices[3], self.vertices[7], self.vertices[4]),
+                    (self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5])]
+
+    #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
+    def draw(self):
+        #Обнуляем прыдыдушие параметры (Хрен знает что это)
+        self.faces_to_draw = []
+        self.screen_vertices_dat = []
+        self.edge_points = []
+        self.screen_facesC = []
+        self.face_vertexesSCR = []
         
         for i in self.vertices:
             screenXYZ = i[0] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y") + hweight, i[2] * focal_length / distance(0,camera_pos[1],0,0,i[1],0, True, "y") + hheight
@@ -107,13 +104,13 @@ class Cube:
             colorvert = max(min(255, round(lerp(1, 0.2, (i[3]/yblackout)) * 255)), 0)
             pygame.draw.circle(screen, rgb_unit0_1(colorvert, False), (i[0], i[1]), 5)
 
-        for i in range(8):
+        for i in range(self.verices_amo):
             coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
             start = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
             end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 and i != 7 else (self.screen_vertices_dat[i - 3][0], self.screen_vertices_dat[i - 3][1])
             pygame.draw.line(screen, rgb_unit0_1(coloredge, False), start, end)
             
-        for i in range(8):
+        for i in range(self.verices_amo):
             if i > 3:
                 coloredge = max(min(255, round(lerp(1, 0.2, (self.screen_vertices_dat[i][3]/(yblackout+1))) * 255)), 0)
                 start = (self.screen_vertices_dat[i-4][0], self.screen_vertices_dat[i-4][1])
@@ -127,7 +124,6 @@ class Cube:
             pygame.draw.polygon(screen, rgb_unit0_1(colorface, False), (elem[0], elem[1], elem[2], elem[3]))
 
 cube = Cube(7, (0, 0, 0))        
-cube.draw()
 
 running = True
 start_time = time()
@@ -147,7 +143,7 @@ while running:
 
     scrVert = cube.screen_vertices_dat
     scrDrawEdges = cube.edge_points
-
+    cube.update(t) #Каждый раз просчитываем новые параметры матриц уже в функции
     cube.draw()
     pygame.display.flip()
     os.system("cls")
