@@ -1,1 +1,4 @@
-venv
+__pycache__/
+__pycache__/matrices.cpython-314.pyc
+__pycache__/math_functions.cpython-314.pyc
+__pycache__/math_functions.cpython-314.pyc
