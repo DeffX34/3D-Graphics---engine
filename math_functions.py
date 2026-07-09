@@ -1,4 +1,4 @@
-from math import sqrt, sin, cos, acos, asin
+from math import sqrt, sin, cos, acos, asin, pi
 def rgb0_1(r, g, b, multiplier=1, convertto255 = True):
     if convertto255:
         return (round((r*255)*multiplier), round((g*255)*multiplier), round((b*255)*multiplier))
@@ -69,3 +69,5 @@ def lerpV(v1, v2, alpha):
     z = v1[2] + alpha * (v2[2] - v1[2])
     return(x, y, z)
 
+def graduceToRad(angle):
+    return angle * pi / 180
