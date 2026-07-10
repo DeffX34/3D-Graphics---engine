@@ -34,7 +34,7 @@ start_time = time()
 t = 0
 
 camera_pos = (0,0,0)
-shape_pos = [0, 20, 0]
+shape_pos = [0, 25, 0]
 
 r = 100
 root = ctk.CTk()
@@ -53,12 +53,14 @@ settings_window.grid_propagate(0)
 settings_window.pack(side="right", fill = "y")
 enginescreen = ctk.CTkCanvas(root, width = WIDTH, height = HEIGHT, highlightthickness=0, bg=rgb_to_hex((40, 40, 40)))
 enginescreen.pack(expand=1, fill="both")
-cube = Cube(7, (shape_pos), enginescreen)
-sphere = Sphere(7, (shape_pos), enginescreen)
+cube = Cube(8, (shape_pos), enginescreen)
+sphere = Sphere(8, (shape_pos), enginescreen)
+pyramide = Pyramide(8, (shape_pos), enginescreen)
+cylinder = Cylinder(6,9, (shape_pos), enginescreen)
 
 currentshape = sphere
 
-shapes = {"Cube":cube, "Sphere":sphere}
+shapes = {"Cube" : cube, "Sphere" : sphere, "Pyramide" : pyramide, "Cylinder" : cylinder}
 
 def switchmodel(choice):
     global currentshape
@@ -97,7 +99,7 @@ modelviewmodetext = ctk.CTkLabel(settings_window, text = "View mode: ", font=eng
 
 modelviewmodetext.grid(column = 1, row = 2)
 
-modelviewmodemenu = ctk.CTkOptionMenu(settings_window, values=["lit", "unlit", "edges", "vertex"], command=switchviewmode, 
+modelviewmodemenu = ctk.CTkOptionMenu(settings_window, values=["Lit", "Unlit", "Depth", "Index of faces", "Only edges", "Only verteces"], command=switchviewmode, 
                                     fg_color=rgb_to_hex((80,80,80), 1), 
                                     button_color=rgb_to_hex((130,130,130), 1), 
                                     button_hover_color=rgb_to_hex((170,170,170), 1),

@@ -69,5 +69,5 @@ def lerpV(v1, v2, alpha):
     z = v1[2] + alpha * (v2[2] - v1[2])
     return(x, y, z)
 
-def graduceToRad(angle):
+def degreeToRad(angle):
     return angle * pi / 180
