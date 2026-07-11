@@ -71,7 +71,7 @@ focal_length_min = 150
 focal_length_max = 650
 
 directional_light_pos = (30, 10, 15)
-normalized_light_dir = normalize(minusV(shape_pos, directional_light_pos))
+normalized_light_dir = normalize(minusV(directional_light_pos, shape_pos))
 
 def switchmodel(choice):
     global currentshape
@@ -137,6 +137,9 @@ for i in range(3):
     ctkentr.bind("<Return>", lambda event, ax = entryaxis[i], axval = entrycoord: switchcoords(event, ax, axval))
 
 #Focal length slidebar
+focal_length_text = ctk.CTkLabel(settings_window, font=enginefont, text = "Focal length")
+focal_length_text.grid(row = 4, column = 1)
+
 focal_length_slidebar = ctk.CTkSlider(settings_window, from_=focal_length_min, to=focal_length_max, variable=focal_length)
 focal_length_slidebar.set(lerp(focal_length_min, focal_length_max, 0.5))
 focal_length_slidebar.grid(row = 4, column = 2, columnspan = 5)
