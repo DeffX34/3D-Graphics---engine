@@ -29,7 +29,8 @@ def crossproduct(v1, v2):
 
 def normalize(v):
     length = sqrt(v[0]**2+v[1]**2+v[2]**2)
-    return (v[0]/length,v[1]/length,v[2]/length)
+    
+    return (v[0]/length,v[1]/length,v[2]/length) if length != 0 else (0, 0, 0)
 
 def lengthsquared(v):
     return(v[0]**2, v[1]**2, v[2]**2)
