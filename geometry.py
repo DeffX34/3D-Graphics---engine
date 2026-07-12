@@ -1,5 +1,5 @@
 from math import sin, cos, pi
-from matrices import rot_matrix
+from matrices import *
 from math_functions import *
 import customtkinter as ctk
 
@@ -36,14 +36,16 @@ class Cube:
         self.zc = self.pos[2]
 
     #Смотри - лучше обновлять матрицы и другие параметры в отдельной функции чем в draw - так и чище и расширяемее (Плюсом тестировать легче - одни каефы).
-    def update(self,t):
-        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360)
+    def update(self,t, mouse_rotation, is_mouse_rotation, delta_time):
+        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360) if not is_mouse_rotation else mouse_rotation
         self.xR = self.rot[0]
         self.yR = self.rot[1]
         self.zR = self.rot[2]
 
+    
         self.matrix = rot_matrix(self.xR, self.yR, self.zR)
-        
+
+
         self.vc = [ [-self.a, -self.a, -self.a],
                     [self.a, -self.a, -self.a],
                     [self.a, self.a, -self.a],
@@ -53,7 +55,9 @@ class Cube:
                     [self.a, self.a, self.a],
                     [-self.a, self.a, self.a] ]
 
-        self.vertices = [[(self.vc[x][0]*self.matrix[0][0]) + (self.vc[x][1]*self.matrix[0][1]) + (self.vc[x][2]*self.matrix[0][2]) + self.xc, ((self.vc[x][0]*self.matrix[1][0]) + (self.vc[x][1]*self.matrix[1][1]) + (self.vc[x][2]*self.matrix[1][2])) + self.yc, (self.vc[x][0]*self.matrix[2][0]) + (self.vc[x][1]*self.matrix[2][1]) + (self.vc[x][2]*self.matrix[2][2]) + self.zc] for x in range(0, self.verices_amo)] #optimised   
+
+        self.vertices = [[(self.vc[x][0]*self.matrix[0][0]) + (self.vc[x][1]*self.matrix[0][1]) + (self.vc[x][2]*self.matrix[0][2]) + self.xc, ((self.vc[x][0]*self.matrix[1][0]) + (self.vc[x][1]*self.matrix[1][1]) + (self.vc[x][2]*self.matrix[1][2])) + self.yc, (self.vc[x][0]*self.matrix[2][0]) + (self.vc[x][1]*self.matrix[2][1]) + (self.vc[x][2]*self.matrix[2][2]) + self.zc] for x in range(0, self.verices_amo)] #optimised  
+ 
         self.cube_facesC = [
                     (self.vertices[0], self.vertices[3], self.vertices[2], self.vertices[1]),
                     (self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]),
@@ -63,8 +67,10 @@ class Cube:
                     (self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5])]
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir):
-        self.update(t) 
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+
+        self.a = size
+        self.update(t, mouse_rotation, is_mouse_rotation, delta_time) 
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
         self.screen_vertices_dat = []
@@ -79,7 +85,7 @@ class Cube:
         
         if mode["Only verteces"]:
             for i in self.screen_vertices_dat:
-                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0))
+                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0), tags = "mesh")
 
         for i in self.cube_facesC:
             centercoord = (i[0][0]+i[2][0])/2, (i[0][1] + i[2][1])/2, (i[0][2] + i[2][2])/2
@@ -93,7 +99,7 @@ class Cube:
 
             normal = normalize(crossproduct(edge1, edge2))
 
-            litcoeff = lerp(0.5, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
 
             facecullingvalue = dotproduct(normal, normalize(minusV(centercoord, camera_pos)))*-1
 
@@ -111,13 +117,13 @@ class Cube:
             for i in range(self.verices_amo):
                 start = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
                 end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 and i != 7 else (self.screen_vertices_dat[i - 3][0], self.screen_vertices_dat[i - 3][1])
-                self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)))
+                self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
                 
             for i in range(self.verices_amo):
                 if i > 3:
                     start = (self.screen_vertices_dat[i-4][0], self.screen_vertices_dat[i-4][1])
                     end = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
-                    self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)))
+                    self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
 
         self.screen_facesC.sort(reverse=True)
         colorsind = [(255, 50, 100), (50, 255, 100), (100, 50, 255), (255, 255, 255), (80, 155, 20), (180, 10, 255)]
@@ -128,7 +134,7 @@ class Cube:
                 if mode["Lit"] or mode["Unlit"] or mode["Index of faces"] or mode["Depth"]:
                     depthcolor = max(min(c[4]/zblackout, 1), 0)
                     final_color = rgb_to_hex(colorsind[c[3]], 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(depthcolor)) if mode["Depth"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(c[5]))
-                    self.drawscreen.create_polygon(elem[0], elem[1], elem[2], elem[3], fill = final_color)
+                    self.drawscreen.create_polygon(elem[0], elem[1], elem[2], elem[3], fill = final_color, tags = "mesh")
 
 
 class Sphere:
@@ -165,6 +171,7 @@ class Sphere:
         self.zc = self.pos[2]
 
     def generate_sphere(self):
+        self.vc = []
         for i in range(0, self.detalization):
             phi = degreeToRad((i / self.detalization) * 360)
             for j in range(0, self.detalization):
@@ -175,8 +182,8 @@ class Sphere:
                 self.vc.append([x, y, z])
 
     #Смотри - лучше обновлять матрицы и другие параметры в отдельной функции чем в draw - так и чище и расширяемее (Плюсом тестировать легче - одни каефы).
-    def update(self,t):
-        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360)
+    def update(self,t, mouse_rotation, is_mouse_rotation, delta_time):
+        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360) if not is_mouse_rotation else mouse_rotation
         self.xR = self.rot[0]
         self.yR = self.rot[1]
         self.zR = self.rot[2]
@@ -190,8 +197,11 @@ class Sphere:
         self.sphere_facesC = []
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir):
-        self.update(t)
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+        if self.r != size:
+            self.r = size
+            self.generate_sphere()
+        self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
         self.screen_vertices_dat = []
@@ -244,7 +254,7 @@ class Sphere:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.5, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
 
             self.faces_to_draw.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.sphere_facesC.index(i), faceZ, litcoeff, facecullingvalue))
             coords = []
@@ -291,8 +301,8 @@ class Pyramide:
         self.zc = self.pos[2]
 
     #Смотри - лучше обновлять матрицы и другие параметры в отдельной функции чем в draw - так и чище и расширяемее (Плюсом тестировать легче - одни каефы).
-    def update(self,t):
-        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360)
+    def update(self,t, mouse_rotation, is_mouse_rotation, delta_time):
+        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360)  if not is_mouse_rotation else mouse_rotation
         self.xR = self.rot[0]
         self.yR = self.rot[1]
         self.zR = self.rot[2]
@@ -312,8 +322,9 @@ class Pyramide:
                             (self.vertices[4], self.vertices[3], self.vertices[0]),]
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir):
-        self.update(t)
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+        self.a = size
+        self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
         self.screen_vertices_dat = []
@@ -343,7 +354,7 @@ class Pyramide:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.5, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
 
             facesscreenXYZ = ((i[0][0]+i[2][0])/2) * focal_length / faceZ + hweight, ((i[0][2] + i[2][2])/2) * focal_length / faceZ + hheight, distanceface
             self.screen_facesC.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.pyramide_facesC.index(i), litcoeff, faceZ))
@@ -411,8 +422,8 @@ class Cylinder:
         self.zc = self.pos[2]
 
     #Смотри - лучше обновлять матрицы и другие параметры в отдельной функции чем в draw - так и чище и расширяемее (Плюсом тестировать легче - одни каефы).
-    def update(self,t):
-        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360)
+    def update(self,t, mouse_rotation, is_mouse_rotation, delta_time):
+        self.rot = (((sin(t)+1)/2)*360, ((cos(t+6)+1)/2)*360, ((cos(t+2)+1)/2)*360) if not is_mouse_rotation else mouse_rotation
         self.xR = self.rot[0]
         self.yR = self.rot[1]
         self.zR = self.rot[2]
@@ -435,8 +446,10 @@ class Cylinder:
         self.cylinder_facesC = []
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir):
-        self.update(t)
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+        self.width = size/2
+        self.height = size
+        self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
         self.screen_vertices_dat = []
@@ -504,7 +517,7 @@ class Cylinder:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.5, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
 
             self.faces_to_draw.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.cylinder_facesC.index(i), faceZ, litcoeff))
             coords = []

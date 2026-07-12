@@ -1,4 +1,4 @@
-from math import sin, cos, pi, sqrt, tan, atan
+from math import sin, cos, pi, sqrt, tan, atan, atan2
 from time import sleep, time
 import sys
 from math_functions import *
@@ -27,12 +27,10 @@ asp_ratio = RENDER_WIDTH/RENDER_HEIGHT
 
 FPS = 144
 deltatime = round(1000 / FPS)
-print(deltatime)
+
 zblackout = 2
 start_time = time()
 t = 0
-
-
 
 r = 100
 root = ctk.CTk()
@@ -42,18 +40,43 @@ root.geometry(f"{WIDTH}x{HEIGHT}")
 root.attributes("-topmost", 1)
 settings_window = ctk.CTkFrame(root, bg_color=rgb_to_hex((140, 140, 140)), width=settings_width, corner_radius=0)
 
-settings_window.grid_rowconfigure(0, weight=0)
-settings_window.grid_rowconfigure(7, weight=1)
-settings_window.grid_columnconfigure(0, weight=1)
-settings_window.grid_columnconfigure(7, weight=1)
 settings_window.grid_propagate(0)
 
 settings_window.pack(side="right", fill = "y")
-enginescreen = ctk.CTkCanvas(root, width = WIDTH, height = HEIGHT, highlightthickness=0, bg=rgb_to_hex((40, 40, 40)))
-enginescreen.pack(expand=1, fill="both")
+
+xrot = 0
+yrot = 0
+zrot = 0
+
+mousex = None
+mousey = None 
+
+mouse_rotation = (0, 0, 0)
+is_mouse_rotation = False
+
+def rotateshape(event):
+    global mouse_rotation, xrot, yrot, zrot, mousex, mousey
+    if is_mouse_rotation:
+        if mousex != None:
+
+            xrot -= clamp(event.y-mousey, -1, 1) * 50
+
+            # yrot -= clamp(event.x-mousex, -1, 1) * 50
+
+            zrot += clamp(event.x-mousex, -1, 1) * 50
+
+        mousex = event.x
+        mousey = event.y
+
+        mouse_rotation = (degreeToRad(xrot), degreeToRad(yrot), degreeToRad(zrot))
+
+
+enginescreen = ctk.CTkCanvas(root, width = RENDER_WIDTH, height = RENDER_HEIGHT, highlightthickness=0, bg=rgb_to_hex((40, 40, 40)))
+enginescreen.bind("<Motion>", lambda event: rotateshape(event))
+enginescreen.pack(side="left", fill="both", expand=1)
 
 camera_pos = (0,0,0)
-shape_pos = [0, 25, 0]
+shape_pos = [0, 40, 0]
 
 zblackout = 30
 cube = Cube(8, (shape_pos), enginescreen)
@@ -66,12 +89,19 @@ currentshape = cube
 viewmodes = {"Lit" : True, "Unlit" : False, "Depth" : False, "Index of faces" : False, "Only edges" : False, "Only verteces" : False}
 shapes = {"Cube" : cube, "Sphere" : sphere, "Pyramide" : pyramide, "Cylinder" : cylinder}
 
-focal_length = ctk.IntVar()
+focal_length = ctk.DoubleVar()
 focal_length_min = 150
 focal_length_max = 650
 
+scale = ctk.DoubleVar()
+scale_min = 2
+scale_max = 20
+
+rotation_phase_multiplier = ctk.DoubleVar()
+rotation_phase_multiplier_min = 0.1
+rotation_phase_multiplier_max = 3
+
 directional_light_pos = (30, 10, 15)
-normalized_light_dir = normalize(minusV(directional_light_pos, shape_pos))
 
 def switchmodel(choice):
     global currentshape
@@ -92,7 +122,15 @@ def switchcoords(event, axis, value):
             shape_pos[value.index(i)] = float(axisvalue)
             currentshape.settings_apply(shape_pos)
 
-    print(shape_pos)
+def rotationchange(button = ctk.CTkButton):
+    global is_mouse_rotation
+
+    if not is_mouse_rotation:
+        button.configure(text="Mouse rotation: ON", fg_color = rgb_to_hex(rgb0_1(0.3, 0.5, 0.3))) 
+        is_mouse_rotation = True
+    else:
+        is_mouse_rotation = False
+        button.configure(text="Mouse rotation: OFF", fg_color = rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)))
 
 #Shape choice UI
 modelchoicetext = ctk.CTkLabel(settings_window, text = "Shape: ", font=enginefont)
@@ -131,9 +169,9 @@ entrycoord = [xve, yve, zve]
 
 for i in range(3):
     ctktext = ctk.CTkLabel(settings_window, text=entryaxis[i], font=enginefont)
-    ctktext.grid(row=3, column=(i+1)+i, pady = 25)
-    ctkentr = ctk.CTkEntry(settings_window, width=10, textvariable=entrycoord[i])
-    ctkentr.grid(row=3, column=(i+2)+i, pady = 25, sticky = "w")
+    ctktext.grid(row=3, column=(i*2), pady = 25, padx = 5)
+    ctkentr = ctk.CTkEntry(settings_window, width=70, textvariable=entrycoord[i])
+    ctkentr.grid(row=3, column=(i*2+1), pady = 25)
     ctkentr.bind("<Return>", lambda event, ax = entryaxis[i], axval = entrycoord: switchcoords(event, ax, axval))
 
 #Focal length slidebar
@@ -144,10 +182,55 @@ focal_length_slidebar = ctk.CTkSlider(settings_window, from_=focal_length_min, t
 focal_length_slidebar.set(lerp(focal_length_min, focal_length_max, 0.5))
 focal_length_slidebar.grid(row = 4, column = 2, columnspan = 5)
 
+# Shape scale slidebar
+size_text = ctk.CTkLabel(settings_window, font=enginefont, text = "Shape size")
+size_text.grid(row = 5, column = 1, pady = 20)
+
+size_slidebar = ctk.CTkSlider(settings_window, from_=scale_min, to=scale_max, variable=scale)
+size_slidebar.set(lerp(scale_min, scale_max, 0.5))
+size_slidebar.grid(row = 5, column = 2, columnspan = 5, pady = 20)
+
+# Rotation settings
+rotation_phase_text = ctk.CTkLabel(settings_window, font=enginefont, text = "Rotation speed")
+rotation_phase_text.grid(row = 6, column = 1, pady = 15)
+
+rotation_phase_slidebar = ctk.CTkSlider(settings_window, from_=rotation_phase_multiplier_min, to=rotation_phase_multiplier_max, variable=rotation_phase_multiplier)
+rotation_phase_slidebar.set(lerp(rotation_phase_multiplier_min, rotation_phase_multiplier_max, 0.2))
+rotation_phase_slidebar.grid(row = 6, column = 2, columnspan = 5, pady = 15)
+
+mouse_rotation_button = ctk.CTkButton(settings_window, text = "Mouse rotation: OFF", font = enginefont, fg_color= rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)), hover_color=rgb_to_hex(rgb_unit0_1(0.5)))
+mouse_rotation_button.bind("<Button-1>", lambda ev: rotationchange(mouse_rotation_button))
+mouse_rotation_button.grid(row = 7, column = 1, columnspan = 7)
+
+deltatimeinseconds = 0
+deltatimebef = 0
+
+enginescreen.grid_propagate(0)
+enginescreen.grid_columnconfigure(0, weight=1)
+
+fpstext = ctk.CTkLabel(enginescreen, text = "", bg_color="transparent", font=enginefont)
+fpstext.grid(column = 1, row = 0)
+
+
 def gameloop():
-    t = (time() - start_time) * 0.5
-    enginescreen.delete("all")
-    currentshape.draw(t, camera_pos, focal_length.get(), hweight, hheight, viewmodes, zblackout, directional_light_pos, normalized_light_dir)
+    global deltatimebef, deltatimeinseconds
+    
+    current_time = time()
+    
+    deltatimeinseconds = current_time - deltatimebef
+
+    deltatimebef = current_time
+
+    fpstext.configure(text=f"FPS: {round(1/deltatimeinseconds)}")
+
+    t = (time() - start_time) * rotation_phase_multiplier.get()
+
+    enginescreen.delete("mesh")
+
+    currentshape.draw(t, camera_pos, focal_length.get(), hweight, hheight, viewmodes, zblackout, directional_light_pos, normalize(minusV(directional_light_pos, shape_pos)), scale.get(), mouse_rotation, is_mouse_rotation, deltatimeinseconds)
+
+    print(deltatimeinseconds)
+
     root.after(deltatime, gameloop)
 
 

@@ -72,3 +72,6 @@ def lerpV(v1, v2, alpha):
 
 def degreeToRad(angle):
     return angle * pi / 180
+
+def clamp(value, minv, maxv):
+    return max(min(value, maxv), minv)
