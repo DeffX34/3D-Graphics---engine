@@ -67,9 +67,9 @@ class Cube:
                     (self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5])]
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time, minlightcoeff):
 
-        self.a = size
+        self.a = size / 2
         self.update(t, mouse_rotation, is_mouse_rotation, delta_time) 
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
@@ -99,7 +99,7 @@ class Cube:
 
             normal = normalize(crossproduct(edge1, edge2))
 
-            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(minlightcoeff, 1, dotproduct(normal, normalized_light_dir))
 
             facecullingvalue = dotproduct(normal, normalize(minusV(centercoord, camera_pos)))*-1
 
@@ -194,7 +194,7 @@ class Sphere:
         self.sphere_facesC = []
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time, minlightcoeff):
 
         self.generate_sphere()
         self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
@@ -249,7 +249,7 @@ class Sphere:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(minlightcoeff, 1, dotproduct(normal, normalized_light_dir))
 
             self.faces_to_draw.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.sphere_facesC.index(i), faceZ, litcoeff, facecullingvalue))
             coords = []
@@ -317,8 +317,8 @@ class Pyramide:
                             (self.vertices[4], self.vertices[3], self.vertices[0]),]
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
-        self.a = size
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time, minlightcoeff):
+        self.a = size / 2
         self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
         #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
@@ -349,7 +349,7 @@ class Pyramide:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(minlightcoeff, 1, dotproduct(normal, normalized_light_dir))
 
             facesscreenXYZ = ((i[0][0]+i[2][0])/2) * focal_length / faceZ + hweight, ((i[0][2] + i[2][2])/2) * focal_length / faceZ + hheight, distanceface
             self.screen_facesC.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.pyramide_facesC.index(i), litcoeff, faceZ))
@@ -369,8 +369,8 @@ class Pyramide:
                     end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 else (self.screen_vertices_dat[0][0], self.screen_vertices_dat[0][1])
                     self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
                 else:
-                    for j in self.vertices:
-                        self.drawscreen.create_line(j[0], j[1], self.vertices[4][0], self.vertices[4][1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
+                    for j in range(self.verices_amo-1):
+                        self.drawscreen.create_line(self.screen_vertices_dat[j][0], self.screen_vertices_dat[j][1], self.screen_vertices_dat[4][0], self.screen_vertices_dat[4][1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
                     
 
         self.screen_facesC.sort(reverse=True)
@@ -441,7 +441,7 @@ class Cylinder:
         self.cylinder_facesC = []
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
-    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
+    def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time, minlightcoeff):
         self.width = size/2
         self.height = size
         self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
@@ -512,7 +512,7 @@ class Cylinder:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.55, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(minlightcoeff, 1, dotproduct(normal, normalized_light_dir))
 
             self.faces_to_draw.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.cylinder_facesC.index(i), faceZ, litcoeff))
             coords = []
@@ -535,7 +535,7 @@ class Cylinder:
             
             facecullingvalue = dotproduct(normal, normalize(minusV(camera_pos, centercoord)))
 
-            litcoeff = lerp(0.5, 1, dotproduct(normal, normalized_light_dir))
+            litcoeff = lerp(minlightcoeff, 1, dotproduct(normal, normalized_light_dir))
             
             self.faces_to_draw.append((distanceface, facesscreenXYZ[0], facesscreenXYZ[1], self.detalization+t, faceZ, litcoeff))
             

@@ -52,15 +52,16 @@ mousey = None
 
 mouse_rotation = (0, 0, 0)
 is_mouse_rotation = False
+rotationsens = 1750
 
 def rotateshape(event):
-    global mouse_rotation, yrot, zrot, mousex, mousey
+    global mouse_rotation, yrot, zrot, mousex, mousey, rotationsens
     if is_mouse_rotation:
         if mousex != None:
 
-            yrot -= clamp(event.y-mousey, -1, 1) * 50
+            yrot -= (event.y-mousey) * deltatimeinseconds * rotationsens
 
-            zrot += clamp(event.x-mousex, -1, 1) * 50
+            zrot += (event.x-mousex) * deltatimeinseconds * rotationsens
 
         mousex = event.x
         mousey = event.y
@@ -68,8 +69,6 @@ def rotateshape(event):
         print(yrot, zrot)
 
         mouse_rotation = (degreeToRad(yrot), degreeToRad(0), degreeToRad(zrot))
-
-
 
 enginescreen = ctk.CTkCanvas(root, width = RENDER_WIDTH, height = RENDER_HEIGHT, highlightthickness=0, bg=rgb_to_hex((40, 40, 40)))
 enginescreen.bind("<Motion>", lambda event: rotateshape(event))
@@ -92,7 +91,7 @@ fpslist = ["15", "30", "60", "90", "120"]
 
 focal_length = ctk.DoubleVar()
 focal_length_min = 150
-focal_length_max = 650
+focal_length_max = 1250
 
 scale = ctk.DoubleVar()
 scale_min = 2
@@ -102,7 +101,11 @@ rotation_phase_multiplier = ctk.DoubleVar()
 rotation_phase_multiplier_min = 0.1
 rotation_phase_multiplier_max = 3
 
+minlightcoeff = 0.5 # must be more then 0.5!
+
 directional_light_pos = (30, 10, 15)
+
+is_sky = False
 
 def switchmodel(choice):
     global currentshape
@@ -123,7 +126,7 @@ def switchcoords(event, axis, value):
             shape_pos[value.index(i)] = float(axisvalue)
             currentshape.settings_apply(shape_pos)
 
-def rotationchange(button = ctk.CTkButton):
+def rotationchange(button):
     global is_mouse_rotation
 
     if not is_mouse_rotation:
@@ -141,7 +144,19 @@ def focallength_with_wheel(event):
 def setfps(choice):
     global FPS
     FPS = int(choice)
+    deltatime = round(1000 / FPS)
 
+def skychange(button_sky, enginescreen):
+    global is_sky
+    if not is_sky:
+        enginescreen.configure(bg = rgb_to_hex((rgb0_1(0.68, 0.85, 0.90, 1)), 1))
+        button_sky.configure(text="Sky: ON", fg_color = rgb_to_hex(rgb0_1(0.3, 0.5, 0.3))) 
+        is_sky = True
+    else:
+        enginescreen.configure(bg = rgb_to_hex(rgb_unit0_1(0), 1))
+        button_sky.configure(text="Sky: OFF", fg_color = rgb_to_hex(rgb0_1(0.5, 0.3, 0.3))) 
+        is_sky = False
+        
 #Shape choice UI
 modelchoicetext = ctk.CTkLabel(settings_window, text = "Shape: ", font=enginefont)
 
@@ -160,8 +175,6 @@ modelchoicemenu.grid(row=1, column = 2, columnspan = 5, pady = 50)
 modelviewmodetext = ctk.CTkLabel(settings_window, text = "View mode: ", font=enginefont)
 
 modelviewmodetext.grid(column = 1, row = 2)
-
-
 
 modelviewmodemenu = ctk.CTkOptionMenu(settings_window, values=list(viewmodes), command=switchviewmode, 
                                     fg_color=rgb_to_hex((80,80,80), 1), 
@@ -189,7 +202,7 @@ focal_length_text = ctk.CTkLabel(settings_window, font=enginefont, text = "Focal
 focal_length_text.grid(row = 4, column = 1)
 
 focal_length_slidebar = ctk.CTkSlider(settings_window, from_=focal_length_min, to=focal_length_max, variable=focal_length)
-focal_length_slidebar.set(lerp(focal_length_min, focal_length_max, 0.5))
+focal_length_slidebar.set(lerp(focal_length_min, focal_length_max, 0.25))
 focal_length_slidebar.grid(row = 4, column = 2, columnspan = 5)
 
 # Shape scale slidebar
@@ -208,8 +221,9 @@ rotation_phase_slidebar = ctk.CTkSlider(settings_window, from_=rotation_phase_mu
 rotation_phase_slidebar.set(lerp(rotation_phase_multiplier_min, rotation_phase_multiplier_max, 0.2))
 rotation_phase_slidebar.grid(row = 6, column = 2, columnspan = 5, pady = 15)
 
-mouse_rotation_button = ctk.CTkButton(settings_window, text = "Mouse rotation: OFF", font = enginefont, fg_color= rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)), hover_color=rgb_to_hex(rgb_unit0_1(0.5)))
-mouse_rotation_button.bind("<Button-1>", lambda ev: rotationchange(mouse_rotation_button))
+mouse_rotation_button = ctk.CTkButton(settings_window, text = "Mouse rotation: OFF", font = enginefont, fg_color= rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)), hover_color=rgb_to_hex(rgb_unit0_1(0.5)),
+                                      command = lambda ev = 1: rotationchange(mouse_rotation_button))
+
 mouse_rotation_button.grid(row = 7, column = 1, columnspan = 7)
 
 #Fps choice
@@ -227,9 +241,14 @@ fpschoicemenu = ctk.CTkOptionMenu(settings_window, values=list(fpslist), command
 fpschoicemenu.grid(row=8, column = 2, columnspan = 5, pady = 20)
 fpschoicemenu.set("60")
 
-
 deltatimeinseconds = 0
 deltatimebef = 0
+
+# sky settings
+sky_enable_button = ctk.CTkButton(settings_window, text = "Sky: OFF", font = enginefont, fg_color= rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)), hover_color=rgb_to_hex(rgb_unit0_1(0.5)),
+                                  command = lambda event = None: skychange(sky_enable_button, enginescreen))
+
+sky_enable_button.grid(row = 9, column = 1, columnspan = 7)
 
 enginescreen.grid_propagate(0)
 enginescreen.grid_columnconfigure(0, weight=1)
@@ -250,17 +269,15 @@ def gameloop():
 
     deltatimebef = current_time
 
-    fpstext.configure(text=f"FPS: {round(1/deltatimeinseconds)}")
+    fpstext.configure(text=f"FPS: {round(1/deltatimeinseconds if deltatimeinseconds > 0 else 0.001)}")
 
     t = (time() - start_time) * rotation_phase_multiplier.get()
 
     enginescreen.delete("mesh")
 
-    currentshape.draw(t, camera_pos, focal_length.get(), hweight, hheight, viewmodes, zblackout, directional_light_pos, normalize(minusV(directional_light_pos, shape_pos)), scale.get(), mouse_rotation, is_mouse_rotation, deltatimeinseconds)
+    currentshape.draw(t, camera_pos, focal_length.get(), hweight, hheight, viewmodes, zblackout, directional_light_pos, normalize(minusV(directional_light_pos, shape_pos)), scale.get(), mouse_rotation, is_mouse_rotation, deltatimeinseconds, minlightcoeff)
 
     root.after(round(1000 / FPS), gameloop)
 
-
-enginescreen.configure(bg = rgb_to_hex((rgb0_1(0.68, 0.85, 0.90, 0)), 1))
 gameloop()
 root.mainloop()
