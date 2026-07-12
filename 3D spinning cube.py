@@ -25,7 +25,7 @@ enginefont = ("Rajdhani", 20)
 
 asp_ratio = RENDER_WIDTH/RENDER_HEIGHT
 
-FPS = 144
+FPS = 60
 deltatime = round(1000 / FPS)
 
 zblackout = 2
@@ -44,7 +44,6 @@ settings_window.grid_propagate(0)
 
 settings_window.pack(side="right", fill = "y")
 
-xrot = 0
 yrot = 0
 zrot = 0
 
@@ -55,20 +54,21 @@ mouse_rotation = (0, 0, 0)
 is_mouse_rotation = False
 
 def rotateshape(event):
-    global mouse_rotation, xrot, yrot, zrot, mousex, mousey
+    global mouse_rotation, yrot, zrot, mousex, mousey
     if is_mouse_rotation:
         if mousex != None:
 
-            xrot -= clamp(event.y-mousey, -1, 1) * 50
-
-            # yrot -= clamp(event.x-mousex, -1, 1) * 50
+            yrot -= clamp(event.y-mousey, -1, 1) * 50
 
             zrot += clamp(event.x-mousex, -1, 1) * 50
 
         mousex = event.x
         mousey = event.y
 
-        mouse_rotation = (degreeToRad(xrot), degreeToRad(yrot), degreeToRad(zrot))
+        print(yrot, zrot)
+
+        mouse_rotation = (degreeToRad(yrot), degreeToRad(0), degreeToRad(zrot))
+
 
 
 enginescreen = ctk.CTkCanvas(root, width = RENDER_WIDTH, height = RENDER_HEIGHT, highlightthickness=0, bg=rgb_to_hex((40, 40, 40)))
@@ -88,6 +88,7 @@ currentshape = cube
 
 viewmodes = {"Lit" : True, "Unlit" : False, "Depth" : False, "Index of faces" : False, "Only edges" : False, "Only verteces" : False}
 shapes = {"Cube" : cube, "Sphere" : sphere, "Pyramide" : pyramide, "Cylinder" : cylinder}
+fpslist = ["15", "30", "60", "90", "120"]
 
 focal_length = ctk.DoubleVar()
 focal_length_min = 150
@@ -131,6 +132,15 @@ def rotationchange(button = ctk.CTkButton):
     else:
         is_mouse_rotation = False
         button.configure(text="Mouse rotation: OFF", fg_color = rgb_to_hex(rgb0_1(0.5, 0.3, 0.3)))
+
+def focallength_with_wheel(event):
+    delta = event.delta * 0.25
+    current_focal_length = focal_length.get() + delta
+    focal_length_slidebar.set(round(min(max(current_focal_length, focal_length_min), focal_length_max)))
+
+def setfps(choice):
+    global FPS
+    FPS = int(choice)
 
 #Shape choice UI
 modelchoicetext = ctk.CTkLabel(settings_window, text = "Shape: ", font=enginefont)
@@ -202,12 +212,31 @@ mouse_rotation_button = ctk.CTkButton(settings_window, text = "Mouse rotation: O
 mouse_rotation_button.bind("<Button-1>", lambda ev: rotationchange(mouse_rotation_button))
 mouse_rotation_button.grid(row = 7, column = 1, columnspan = 7)
 
+#Fps choice
+fpschoicetext = ctk.CTkLabel(settings_window, text = "Fps: ", font=enginefont)
+
+fpschoicetext.grid(column = 1, row = 8, pady = 20)
+
+fpschoicemenu = ctk.CTkOptionMenu(settings_window, values=list(fpslist), command= lambda choice: setfps(choice), 
+                                    fg_color=rgb_to_hex((80,80,80), 1), 
+                                    button_color=rgb_to_hex((130,130,130), 1), 
+                                    button_hover_color=rgb_to_hex((170,170,170), 1),
+                                    width=250, height=50,
+                                    font=enginefont, dropdown_font=enginefont)
+
+fpschoicemenu.grid(row=8, column = 2, columnspan = 5, pady = 20)
+fpschoicemenu.set("60")
+
+
 deltatimeinseconds = 0
 deltatimebef = 0
 
 enginescreen.grid_propagate(0)
 enginescreen.grid_columnconfigure(0, weight=1)
 
+enginescreen.bind("<MouseWheel>", lambda event: focallength_with_wheel(event))
+
+# fps text
 fpstext = ctk.CTkLabel(enginescreen, text = "", bg_color="transparent", font=enginefont)
 fpstext.grid(column = 1, row = 0)
 
@@ -229,9 +258,7 @@ def gameloop():
 
     currentshape.draw(t, camera_pos, focal_length.get(), hweight, hheight, viewmodes, zblackout, directional_light_pos, normalize(minusV(directional_light_pos, shape_pos)), scale.get(), mouse_rotation, is_mouse_rotation, deltatimeinseconds)
 
-    print(deltatimeinseconds)
-
-    root.after(deltatime, gameloop)
+    root.after(round(1000 / FPS), gameloop)
 
 
 enginescreen.configure(bg = rgb_to_hex((rgb0_1(0.68, 0.85, 0.90, 0)), 1))

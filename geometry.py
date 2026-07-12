@@ -138,7 +138,7 @@ class Cube:
 
 
 class Sphere:
-    def __init__(self, r, pos, screen = ctk.CTkCanvas):
+    def __init__(self, r, pos, screen):
         self.pos = pos
         self.r = r
         self.rot = (0, 0, 0)
@@ -153,7 +153,6 @@ class Sphere:
         self.screen_vertices_dat = []
         self.edge_points = []
         self.vertices = []
-        self.verices_amo = 8 #Указываем вершины для любой фигуры заранее (потом можно будет создавать фигуры с любым количеством вершин)
         self.sphere_facesC = []
         self.screen_facesC = []
         self.screen_verticesC = []
@@ -189,20 +188,16 @@ class Sphere:
         self.zR = self.rot[2]
         self.matrix = rot_matrix(self.xR, self.yR, self.zR)
        
-        if not self.generated:
-            self.generate_sphere()
-            self.generated = True
+        
         
         self.vertices = [[(self.vc[x][0]*self.matrix[0][0]) + (self.vc[x][1]*self.matrix[0][1]) + (self.vc[x][2]*self.matrix[0][2]) + self.xc, ((self.vc[x][0]*self.matrix[1][0]) + (self.vc[x][1]*self.matrix[1][1]) + (self.vc[x][2]*self.matrix[1][2])) + self.yc, (self.vc[x][0]*self.matrix[2][0]) + (self.vc[x][1]*self.matrix[2][1]) + (self.vc[x][2]*self.matrix[2][2]) + self.zc] for x in range(0, len(self.vc))] #optimised   
         self.sphere_facesC = []
 
     #Твой draw - отрисовщик - не над там все матрицы переназначать если они константные   
     def draw(self, t, camera_pos, focal_length, hweight, hheight, mode, zblackout, lightpos, normalized_light_dir, size, mouse_rotation, is_mouse_rotation, delta_time):
-        if self.r != size:
-            self.r = size
-            self.generate_sphere()
+
+        self.generate_sphere()
         self.update(t, mouse_rotation, is_mouse_rotation, delta_time)
-        #Обнуляем прыдыдушие параметры (Хрен знает что это)
         self.faces_to_draw = []
         self.screen_vertices_dat = []
         self.edge_points = []
@@ -218,7 +213,7 @@ class Sphere:
 
         if mode["Only verteces"]:
             for i in self.screen_vertices_dat:
-                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0))
+                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0), tags = "mesh")
 
         for i in range(0, self.detalization):  
             
@@ -228,7 +223,7 @@ class Sphere:
                 newcoordPhi01 = self.screen_verticesC[tethaC + (i+1) * self.detalization] if i != self.detalization-1 else self.screen_verticesC[tethaC]
 
                 if mode["Only edges"]:
-                    self.drawscreen.create_line(oldcoordPhi01[0], oldcoordPhi01[1], newcoordPhi01[0], newcoordPhi01[1], fill=rgb_to_hex((1,1,1)))
+                    self.drawscreen.create_line(oldcoordPhi01[0], oldcoordPhi01[1], newcoordPhi01[0], newcoordPhi01[1], fill=rgb_to_hex((1,1,1)), tags = "mesh")
 
                 # Vertical edges (Phi)
 
@@ -236,7 +231,7 @@ class Sphere:
                 newcoordTheta01 = self.screen_verticesC[(i+1) + tethaC * self.detalization] if i != self.detalization-1 else self.screen_verticesC[i]
 
                 if mode["Only edges"]:
-                    self.drawscreen.create_line(oldcoordTheta01[0], oldcoordTheta01[1], newcoordTheta01[0], newcoordTheta01[1], fill=rgb_to_hex((1,1,1)))
+                    self.drawscreen.create_line(oldcoordTheta01[0], oldcoordTheta01[1], newcoordTheta01[0], newcoordTheta01[1], fill=rgb_to_hex((1,1,1)), tags = "mesh")
 
 
                 oldcoordTheta02 = self.screen_verticesC[(i + tethaC * self.detalization) - self.detalization]
@@ -269,7 +264,7 @@ class Sphere:
             for c in self.faces_to_draw:
                 elem = self.face_vertexesSCR[c[3]]
                 depthcolor = max(min(c[4]/zblackout, 1), 0)
-                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex((round(abs(sin(c[3]))*255), round(abs(cos(c[3])*255)), round(abs(sin(c[3]+4)*255))), 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(c[5])) if mode["Lit"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor))))
+                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex((round(abs(sin(c[3]))*255), round(abs(cos(c[3])*255)), round(abs(sin(c[3]+4)*255))), 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(c[5])) if mode["Lit"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor))), tags = "mesh")
 
 class Pyramide:
     def __init__(self, a, pos, screen):
@@ -339,7 +334,7 @@ class Pyramide:
         
         if mode["Only verteces"]:
             for i in self.screen_vertices_dat:
-                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0))
+                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0), tags = "mesh")
 
 
         for i in self.pyramide_facesC:
@@ -372,10 +367,10 @@ class Pyramide:
                 if i != 4:
                     start = (self.screen_vertices_dat[i][0], self.screen_vertices_dat[i][1])
                     end = (self.screen_vertices_dat[i+1][0], self.screen_vertices_dat[i+1][1]) if i != 3 else (self.screen_vertices_dat[0][0], self.screen_vertices_dat[0][1])
-                    self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)))
+                    self.drawscreen.create_line(start[0], start[1], end[0], end[1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
                 else:
                     for j in self.vertices:
-                        self.drawscreen.create_line(j[0], j[1], self.vertices[4][0], self.vertices[4][1], fill = rgb_to_hex((1, 1, 1)))
+                        self.drawscreen.create_line(j[0], j[1], self.vertices[4][0], self.vertices[4][1], fill = rgb_to_hex((1, 1, 1)), tags = "mesh")
                     
 
         self.screen_facesC.sort(reverse=True)
@@ -384,12 +379,12 @@ class Pyramide:
             for c in self.screen_facesC:
                 depthcolor = max(min(c[5]/zblackout, 1), 0)
                 elem = self.face_vertexesSCR[c[3]]
-                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex(colors[c[3]], 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor)) if mode["Depth"] else rgb_to_hex(rgb_unit0_1(c[4]))))
+                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex(colors[c[3]], 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor)) if mode["Depth"] else rgb_to_hex(rgb_unit0_1(c[4]))), tags = "mesh")
 
 
 
 class Cylinder:
-    def __init__(self, width, height, pos, screen = ctk.CTkCanvas):
+    def __init__(self, width, height, pos, screen):
         self.pos = pos
         self.width = width
         self.height = height
@@ -469,7 +464,7 @@ class Cylinder:
 
         if mode["Only verteces"]:
             for i in self.screen_vertices_dat:
-                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0))
+                self.drawscreen.create_aa_circle(i[0], i[1], 5, fill=rgb_to_hex((1, 1, 1), 0), tags = "mesh")
 
 
         
@@ -480,7 +475,7 @@ class Cylinder:
                 newcoord = self.screen_verticesC[j + i * self.detalization] if j != self.detalization else self.screen_verticesC[0 + i * self.detalization]
 
                 if mode["Only edges"]:
-                    self.drawscreen.create_line(oldcoord[0], oldcoord[1], newcoord[0], newcoord[1], fill=rgb_to_hex((1,1,1)))
+                    self.drawscreen.create_line(oldcoord[0], oldcoord[1], newcoord[0], newcoord[1], fill=rgb_to_hex((1,1,1)), tags = "mesh")
 
 
             for l in range(0, self.detalization+1):
@@ -491,7 +486,7 @@ class Cylinder:
                     newcoordF02 = self.screen_verticesC[l + self.detalization] if l != self.detalization else self.screen_verticesC[self.detalization]
                     
                     if mode["Only edges"]:
-                        self.drawscreen.create_line(oldcoordF02[0], oldcoordF02[1], newcoordF02[0], newcoordF02[1], fill=rgb_to_hex((1,1,1)))
+                        self.drawscreen.create_line(oldcoordF02[0], oldcoordF02[1], newcoordF02[0], newcoordF02[1], fill=rgb_to_hex((1,1,1)), tags = "mesh")
 
                     if l > 0:
                         self.cylinder_facesC.append((self.vertices[l-1], self.vertices[l if l != self.detalization else 0], self.vertices[(l + self.detalization) if l != self.detalization else self.detalization], self.vertices[l + self.detalization - 1]))
@@ -558,4 +553,4 @@ class Cylinder:
             for c in self.faces_to_draw:
                 depthcolor = max(min(c[4]/zblackout, 1), 0)
                 elem = self.face_vertexesSCR[c[3]]
-                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex((round(abs(sin(c[3]))*255), round(abs(cos(c[3])*255)), round(abs(sin(c[3]+4)*255))), 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor)) if mode ["Depth"] else rgb_to_hex(rgb_unit0_1(c[5]))))  
+                self.drawscreen.create_polygon(elem, fill = (rgb_to_hex((round(abs(sin(c[3]))*255), round(abs(cos(c[3])*255)), round(abs(sin(c[3]+4)*255))), 1) if mode["Index of faces"] else rgb_to_hex(rgb_unit0_1(0.7)) if mode["Unlit"] else rgb_to_hex(rgb_unit0_1(depthcolor)) if mode ["Depth"] else rgb_to_hex(rgb_unit0_1(c[5]))), tags = "mesh")  
